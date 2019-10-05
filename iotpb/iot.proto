@@ -21,7 +21,8 @@ message SubscribeMessageRequest {
     string topicFilter = 2;
     int32 qos = 3;
     int32 msgId = 4;
-    map<string, string> properties = 5;
+    uint32 guid = 5;
+    map<string, string> properties = 6;
 }
 
 message SubscribeMessageResponse {
@@ -33,6 +34,7 @@ message SubscribeMessageResponse {
 
 message UnSubscribeMessageRequest {
     string topicFilter = 1;
+    uint32 guid = 5;
 }
 
 message UnSubscribeMessageResponse {
