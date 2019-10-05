@@ -86,6 +86,8 @@ message SubTopicLoadResponse{
 service TopicManager {
     rpc PublishMessage(PublishMessageRequest) returns (PublishMessageResponse) {}
     rpc LoadSubTopic(SubTopicLoadRequest) returns (SubTopicLoadResponse) {}
+    rpc Subscribe(SubscribeMessageRequest) returns (SubscribeMessageResponse) {}
+    rpc UnSubscribe(UnSubscribeMessageRequest) returns (UnSubscribeMessageResponse) {}
 }
 
 ///////////////////// registry service //////////////////////////////

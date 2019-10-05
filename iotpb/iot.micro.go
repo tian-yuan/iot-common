@@ -188,6 +188,8 @@ func (h *publishEngineHandler) PublishMessage(ctx context.Context, in *PublishMe
 type TopicManagerService interface {
 	PublishMessage(ctx context.Context, in *PublishMessageRequest, opts ...client.CallOption) (*PublishMessageResponse, error)
 	LoadSubTopic(ctx context.Context, in *SubTopicLoadRequest, opts ...client.CallOption) (*SubTopicLoadResponse, error)
+	Subscribe(ctx context.Context, in *SubscribeMessageRequest, opts ...client.CallOption) (*SubscribeMessageResponse, error)
+	UnSubscribe(ctx context.Context, in *UnSubscribeMessageRequest, opts ...client.CallOption) (*UnSubscribeMessageResponse, error)
 }
 
 type topicManagerService struct {
@@ -228,17 +230,41 @@ func (c *topicManagerService) LoadSubTopic(ctx context.Context, in *SubTopicLoad
 	return out, nil
 }
 
+func (c *topicManagerService) Subscribe(ctx context.Context, in *SubscribeMessageRequest, opts ...client.CallOption) (*SubscribeMessageResponse, error) {
+	req := c.c.NewRequest(c.name, "TopicManager.Subscribe", in)
+	out := new(SubscribeMessageResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *topicManagerService) UnSubscribe(ctx context.Context, in *UnSubscribeMessageRequest, opts ...client.CallOption) (*UnSubscribeMessageResponse, error) {
+	req := c.c.NewRequest(c.name, "TopicManager.UnSubscribe", in)
+	out := new(UnSubscribeMessageResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for TopicManager service
 
 type TopicManagerHandler interface {
 	PublishMessage(context.Context, *PublishMessageRequest, *PublishMessageResponse) error
 	LoadSubTopic(context.Context, *SubTopicLoadRequest, *SubTopicLoadResponse) error
+	Subscribe(context.Context, *SubscribeMessageRequest, *SubscribeMessageResponse) error
+	UnSubscribe(context.Context, *UnSubscribeMessageRequest, *UnSubscribeMessageResponse) error
 }
 
 func RegisterTopicManagerHandler(s server.Server, hdlr TopicManagerHandler, opts ...server.HandlerOption) error {
 	type topicManager interface {
 		PublishMessage(ctx context.Context, in *PublishMessageRequest, out *PublishMessageResponse) error
 		LoadSubTopic(ctx context.Context, in *SubTopicLoadRequest, out *SubTopicLoadResponse) error
+		Subscribe(ctx context.Context, in *SubscribeMessageRequest, out *SubscribeMessageResponse) error
+		UnSubscribe(ctx context.Context, in *UnSubscribeMessageRequest, out *UnSubscribeMessageResponse) error
 	}
 	type TopicManager struct {
 		topicManager
@@ -257,6 +283,14 @@ func (h *topicManagerHandler) PublishMessage(ctx context.Context, in *PublishMes
 
 func (h *topicManagerHandler) LoadSubTopic(ctx context.Context, in *SubTopicLoadRequest, out *SubTopicLoadResponse) error {
 	return h.TopicManagerHandler.LoadSubTopic(ctx, in, out)
+}
+
+func (h *topicManagerHandler) Subscribe(ctx context.Context, in *SubscribeMessageRequest, out *SubscribeMessageResponse) error {
+	return h.TopicManagerHandler.Subscribe(ctx, in, out)
+}
+
+func (h *topicManagerHandler) UnSubscribe(ctx context.Context, in *UnSubscribeMessageRequest, out *UnSubscribeMessageResponse) error {
+	return h.TopicManagerHandler.UnSubscribe(ctx, in, out)
 }
 
 // Client API for RegistryManager service
