@@ -107,8 +107,9 @@ message ConnectMessageRequest {
 }
 
 message ConnectMessageResponse {
-    int32 code = 1;
-    string message = 2;
+    uint32 guid = 1;
+    int32 code = 2;
+    string message = 3;
 }
 
 service RegistryManager {

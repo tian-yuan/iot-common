@@ -58,7 +58,6 @@ func NewRedisSessionStorage(client *redis.ClusterClient) SessionStorage {
 func (rs *redisStorage) Refresh(key, value string, expire time.Duration) (string, error) {
 	var err error
 	e := int(expire / time.Second)
-
 	r := rs.client.EvalSha(refreshScriptSha1, []string{key}, value, e)
 	if err = r.Err(); err != nil && strings.HasPrefix(err.Error(), "NOSCRIPT ") {
 		r = rs.client.Eval(refreshScript, []string{key}, value, e)
