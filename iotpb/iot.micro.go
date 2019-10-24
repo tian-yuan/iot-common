@@ -351,3 +351,79 @@ type registryManagerHandler struct {
 func (h *registryManagerHandler) Registry(ctx context.Context, in *ConnectMessageRequest, out *ConnectMessageResponse) error {
 	return h.RegistryManagerHandler.Registry(ctx, in, out)
 }
+
+// Client API for TopicAcl service
+
+type TopicAclService interface {
+	Subscribe(ctx context.Context, in *SubscribeMessageRequest, opts ...client.CallOption) (*SubscribeMessageResponse, error)
+	UnSubscribe(ctx context.Context, in *UnSubscribeMessageRequest, opts ...client.CallOption) (*UnSubscribeMessageResponse, error)
+}
+
+type topicAclService struct {
+	c    client.Client
+	name string
+}
+
+func NewTopicAclService(name string, c client.Client) TopicAclService {
+	if c == nil {
+		c = client.NewClient()
+	}
+	if len(name) == 0 {
+		name = "iotpb"
+	}
+	return &topicAclService{
+		c:    c,
+		name: name,
+	}
+}
+
+func (c *topicAclService) Subscribe(ctx context.Context, in *SubscribeMessageRequest, opts ...client.CallOption) (*SubscribeMessageResponse, error) {
+	req := c.c.NewRequest(c.name, "TopicAcl.Subscribe", in)
+	out := new(SubscribeMessageResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *topicAclService) UnSubscribe(ctx context.Context, in *UnSubscribeMessageRequest, opts ...client.CallOption) (*UnSubscribeMessageResponse, error) {
+	req := c.c.NewRequest(c.name, "TopicAcl.UnSubscribe", in)
+	out := new(UnSubscribeMessageResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Server API for TopicAcl service
+
+type TopicAclHandler interface {
+	Subscribe(context.Context, *SubscribeMessageRequest, *SubscribeMessageResponse) error
+	UnSubscribe(context.Context, *UnSubscribeMessageRequest, *UnSubscribeMessageResponse) error
+}
+
+func RegisterTopicAclHandler(s server.Server, hdlr TopicAclHandler, opts ...server.HandlerOption) error {
+	type topicAcl interface {
+		Subscribe(ctx context.Context, in *SubscribeMessageRequest, out *SubscribeMessageResponse) error
+		UnSubscribe(ctx context.Context, in *UnSubscribeMessageRequest, out *UnSubscribeMessageResponse) error
+	}
+	type TopicAcl struct {
+		topicAcl
+	}
+	h := &topicAclHandler{hdlr}
+	return s.Handle(s.NewHandler(&TopicAcl{h}, opts...))
+}
+
+type topicAclHandler struct {
+	TopicAclHandler
+}
+
+func (h *topicAclHandler) Subscribe(ctx context.Context, in *SubscribeMessageRequest, out *SubscribeMessageResponse) error {
+	return h.TopicAclHandler.Subscribe(ctx, in, out)
+}
+
+func (h *topicAclHandler) UnSubscribe(ctx context.Context, in *UnSubscribeMessageRequest, out *UnSubscribeMessageResponse) error {
+	return h.TopicAclHandler.UnSubscribe(ctx, in, out)
+}

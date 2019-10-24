@@ -70,14 +70,10 @@ service PublishEngine {
 }
 
 ///////////////////// topic manager service //////////////////////////////
-message SubTopicIdRange {
-    uint32 begin = 1;
-    uint32 end = 2;
-}
-
 message SubTopicLoadRequest{
     string productKey = 1;
-    repeated SubTopicIdRange subTopicIdRange = 2;
+    uint32 segSize = 2;
+    string segInfo = 3;
 }
 
 message SubTopicLoadResponse{
@@ -117,4 +113,9 @@ service RegistryManager {
 }
 
 ///////////////////// topic acl service //////////////////////////////
+service TopicAcl {
+    rpc Subscribe(SubscribeMessageRequest) returns (SubscribeMessageResponse) {}
+    rpc UnSubscribe(UnSubscribeMessageRequest) returns (UnSubscribeMessageResponse) {}
+}
+
 ///////////////////// publish acl service //////////////////////////////
