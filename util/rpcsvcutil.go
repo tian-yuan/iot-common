@@ -3,7 +3,6 @@ package util
 import (
 	"io"
 	"strings"
-	"sync"
 
 	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/util/log"
@@ -21,8 +20,6 @@ const (
 	PUBLISH_ENGINE_SVC     = "iot.publish.engine"
 	CONTROLLER_SVC         = "iot.controller"
 )
-
-var once sync.Once
 
 type RpcCtx struct {
 	// The following fields is rpc service variable
@@ -110,41 +107,38 @@ func (ctx *RpcCtx) CloseControllerSvc() {
 }
 
 func (ctx *RpcCtx) initClientSvc(clientSvcName string) (svc micro.Service) {
-	once.Do(func() {
-		optFunc := func(opt *registry.Options) {
-			opt = &registry.Options{
-				Addrs: strings.Split(Ctx.Options.ZkUrls, ";"),
-			}
+	optFunc := func(opt *registry.Options) {
+		opt = &registry.Options{
+			Addrs: strings.Split(Ctx.Options.ZkUrls, ";"),
 		}
-		registry := zookeeper.NewRegistry(optFunc)
+	}
+	registry := zookeeper.NewRegistry(optFunc)
 
-		t, io, err := tracer.NewTracer(clientSvcName, Ctx.Options.TracerUrl)
-		if err != nil {
-			log.Errorf("init tracer failed, err : %s", err.Error())
-			svc = micro.NewService(
-				micro.Name(clientSvcName),
-				micro.Registry(registry),
-			)
+	t, io, err := tracer.NewTracer(clientSvcName, Ctx.Options.TracerUrl)
+	if err != nil {
+		log.Errorf("init tracer failed, err : %s", err.Error())
+		svc = micro.NewService(
+			micro.Name(clientSvcName),
+			micro.Registry(registry),
+		)
 
-		} else {
-			Ctx.Closer[clientSvcName] = io
+	} else {
+		log.Infof("init client svc : %s success.", clientSvcName)
+		Ctx.Closer[clientSvcName] = io
 
-			svc = micro.NewService(
-				micro.Name(clientSvcName),
-				micro.Registry(registry),
-				micro.WrapClient(ocplugin.NewClientWrapper(t)),
-			)
+		svc = micro.NewService(
+			micro.Name(clientSvcName),
+			micro.Registry(registry),
+			micro.WrapClient(ocplugin.NewClientWrapper(t)),
+		)
 
-		}
-		svc.Init()
-	})
+	}
+	svc.Init()
 	return
 }
 
 func (ctx *RpcCtx) closeClientSvc(clientSvcName string) {
-	once.Do(func() {
-		if Ctx.Closer[clientSvcName] != nil {
-			Ctx.Closer[clientSvcName].Close()
-		}
-	})
+	if Ctx.Closer[clientSvcName] != nil {
+		Ctx.Closer[clientSvcName].Close()
+	}
 }
