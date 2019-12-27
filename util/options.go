@@ -1,15 +1,15 @@
 package util
 
 type Options struct {
-	ZkUrls    string
-	TracerUrl string
+	RegistryUrls string
+	TracerUrl    string
 }
 
 type Option func(o *Options)
 
-func WithZkUrls(zkUrls string) Option {
+func WithRegistryUrls(registryUrls string) Option {
 	return func(o *Options) {
-		o.ZkUrls = zkUrls
+		o.RegistryUrls = registryUrls
 	}
 }
 

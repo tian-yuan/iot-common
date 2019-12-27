@@ -5,11 +5,11 @@ import (
 	"strings"
 
 	"github.com/micro/go-micro"
-	"github.com/micro/go-micro/util/log"
 	"github.com/micro/go-micro/registry"
-	"github.com/micro/go-plugins/registry/zookeeper"
-	"github.com/tian-yuan/iot-common/plugins/tracer"
+	"github.com/micro/go-micro/util/log"
+	"github.com/micro/go-plugins/registry/etcdv3"
 	ocplugin "github.com/micro/go-plugins/wrapper/trace/opentracing"
+	"github.com/tian-yuan/iot-common/plugins/tracer"
 )
 
 const (
@@ -109,10 +109,10 @@ func (ctx *RpcCtx) CloseControllerSvc() {
 func (ctx *RpcCtx) initClientSvc(clientSvcName string) (svc micro.Service) {
 	optFunc := func(opt *registry.Options) {
 		opt = &registry.Options{
-			Addrs: strings.Split(Ctx.Options.ZkUrls, ";"),
+			Addrs: strings.Split(Ctx.Options.RegistryUrls, ";"),
 		}
 	}
-	registry := zookeeper.NewRegistry(optFunc)
+	registry := etcdv3.NewRegistry(optFunc)
 
 	t, io, err := tracer.NewTracer(clientSvcName, Ctx.Options.TracerUrl)
 	if err != nil {
