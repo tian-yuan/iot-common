@@ -34,7 +34,7 @@ type Logger struct {
 	inited    bool
 }
 
-func Init(path ...string) {
+func Init(callerSkip int, path ...string) {
 	l.Lock()
 	defer l.Unlock()
 
@@ -43,7 +43,7 @@ func Init(path ...string) {
 	}
 
 	l.loadCfg(path...)
-	l.init()
+	l.init(callerSkip)
 	l.inited = true
 
 }
@@ -52,11 +52,11 @@ func GetLogger() (ret *Logger) {
 	return l
 }
 
-func (l *Logger) init() {
+func (l *Logger) init(callerSkip int) {
 	l.setSyncers()
 	var err error
 
-	l.Logger, err = l.zapConfig.Build(l.cores(), zap.AddCallerSkip(2))
+	l.Logger, err = l.zapConfig.Build(l.cores(), zap.AddCallerSkip(callerSkip))
 	if err != nil {
 		panic(err)
 	}
