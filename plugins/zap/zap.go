@@ -56,7 +56,7 @@ func (l *Logger) init() {
 	l.setSyncers()
 	var err error
 
-	l.Logger, err = l.zapConfig.Build(l.cores(), zap.AddCallerSkip(4))
+	l.Logger, err = l.zapConfig.Build(l.cores(), zap.AddCallerSkip(2))
 	if err != nil {
 		panic(err)
 	}
